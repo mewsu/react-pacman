@@ -56,9 +56,11 @@ class App extends React.Component {
   };
 
   handleKeyPress = e => {
+    const handleThese = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
+    if (!handleThese.includes(e.key)) return;
     // console.log(e.key);
     const key = e.key;
-    const curPos = this.state.pacmanPos;
+    const curPos = [...this.state.pacmanPos];
     // console.log(curPos);
     // console.log(this.gridBlocks);
     const curBlockInfo = this.gridBlocks[curPos[1] - 1][curPos[0] - 1];
