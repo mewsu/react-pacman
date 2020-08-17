@@ -6,8 +6,16 @@ class App extends React.Component {
     super(props);
     this.state = {
       pacmanPos: [5, 5],
+      ghostPos: [3, 3],
       isFaceLeft: true,
-      isOpen: true
+      isOpen: true,
+      hasDot: [
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1]
+      ]
     };
   }
 
@@ -63,7 +71,9 @@ class App extends React.Component {
     const curPos = [...this.state.pacmanPos];
     // console.log(curPos);
     // console.log(this.gridBlocks);
-    const curBlockInfo = this.gridBlocks[curPos[1] - 1][curPos[0] - 1];
+    const col = curPos[1] - 1;
+    const row = curPos[0] - 1;
+    const curBlockInfo = this.gridBlocks[col][row];
     let isOpen = this.state.isOpen;
     let isFaceLeft = this.state.isFaceLeft;
     if (key == "ArrowLeft" && curBlockInfo[3] != 1) {
@@ -80,7 +90,9 @@ class App extends React.Component {
       return;
     }
     isOpen = !isOpen;
-    this.setState({ pacmanPos: curPos, isOpen, isFaceLeft });
+    const hasDot = JSON.parse(JSON.stringify(this.state.hasDot));
+    if (hasDot[row][col]) hasDot[row][col] = 0;
+    this.setState({ pacmanPos: curPos, isOpen, isFaceLeft, hasDot });
   };
 
   render() {
@@ -88,9 +100,11 @@ class App extends React.Component {
       <div>
         <GameGrid
           pacmanPos={this.state.pacmanPos}
+          ghostPos={this.state.ghostPos}
           isFaceLeft={this.state.isFaceLeft}
           isOpen={this.state.isOpen}
           gridBlocks={this.gridBlocks}
+          hasDot={this.state.hasDot}
         />
       </div>
     );
@@ -126,26 +140,33 @@ const GameGrid = props => {
                 }
               }
             });
-
+            // console.log({ row, col });
+            let ret;
+            if (col == props.pacmanPos[0] && row == props.pacmanPos[1]) {
+              ret = (
+                <div
+                  id="pacman"
+                  className={
+                    props.isFaceLeft
+                      ? props.isOpen
+                        ? "pacman-open-left"
+                        : "pacman-close-left"
+                      : props.isOpen
+                      ? "pacman-open-right"
+                      : "pacman-close-right"
+                  }
+                ></div>
+              );
+            } else if (col == props.ghostPos[0] && row == props.ghostPos[1]) {
+              ret = <div id="ghost"></div>;
+            } else if (props.hasDot[col - 1][row - 1]) {
+              ret = <div className="dot">{String.fromCharCode(9711)}</div>;
+            } else {
+              ret = "";
+            }
             return (
               <div key={`${row}${col}`} className={blockCss}>
-                {col == props.pacmanPos[0] && row == props.pacmanPos[1] ? (
-                  // <div id="pacman">{String.fromCharCode(9711)}</div>
-                  <div
-                    id="pacman"
-                    className={
-                      props.isFaceLeft
-                        ? props.isOpen
-                          ? "pacman-open-left"
-                          : "pacman-close-left"
-                        : props.isOpen
-                        ? "pacman-open-right"
-                        : "pacman-close-right"
-                    }
-                  ></div>
-                ) : (
-                  ""
-                )}
+                {ret}
               </div>
             );
           });
