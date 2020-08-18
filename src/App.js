@@ -1,25 +1,35 @@
+// TODO:
+// ghost facing
+// restart button
+// winning cherry, turn ghost to eatable
+
 import React from "react";
 import ReactDOM from "react-dom";
 
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      pacmanPos: [5, 5],
-      ghostPos: [3, 3],
-      isFaceLeft: true,
-      isOpen: true,
-      hasDot: [
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 0]
-      ],
-      isGameOver: false,
-      score: 1
-    };
+    this.state = Object.assign({}, this.initialState);
   }
+
+  initialState = {
+    pacmanPos: [5, 5],
+    ghostPos: [2, 1],
+    isFaceLeft: true,
+    isOpen: true,
+    hasDot: [
+      [0, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 0]
+    ],
+    isGameOver: false,
+    score: 1,
+    isGhostFaceLeft: false,
+    isGhostTurned: false,
+    isGhostEaten: false
+  };
 
   gridBlocks = [
     // [row, col] -> [top, right, bot, left], 1 = has border
@@ -101,7 +111,16 @@ class App extends React.Component {
       hasDot[curPos[1] - 1][curPos[0] - 1] = 0;
     }
 
+    this.setState({
+      pacmanPos: curPos,
+      isOpen,
+      isFaceLeft,
+      hasDot,
+      score
+    });
+
     // move ghost
+    if (this.state.isGhostEaten) return;
     const ghostPos = [...this.state.ghostPos];
     const ghostPosCol = ghostPos[1] - 1;
     const ghostPosRow = ghostPos[0] - 1;
@@ -116,19 +135,21 @@ class App extends React.Component {
     const ghostMove =
       possibleMoves[getRandomIntInclusive(0, possibleMoves.length - 1)];
     // console.log({ ghostMove });
-
+    let isGhostFaceLeft = this.state.isGhostFaceLeft;
     if (ghostMove == 0) {
       // up
       ghostPos[1]--;
     } else if (ghostMove == 1) {
       // right
       ghostPos[0]++;
+      isGhostFaceLeft = false;
     } else if (ghostMove == 2) {
       // down
       ghostPos[1]++;
     } else if (ghostMove == 3) {
       // left
       ghostPos[0]--;
+      isGhostFaceLeft = true;
     }
     // console.log({ curPos, ghostPos });
 
@@ -141,18 +162,35 @@ class App extends React.Component {
         ghostPos[0] >= curPos[0] &&
         ghostPos[1] >= curPos[1])
     ) {
-      console.log("game over");
-      this.setState({ isGameOver: true });
+      if (this.state.isGhostTurned) {
+        console.log("ghost eaten");
+        score += 100;
+        this.setState({ isGhostEaten: true });
+      } else {
+        console.log("game over");
+        this.setState({ isGameOver: true });
+        return;
+      }
+    }
+
+    console.log({ ghostPos });
+    let isGhostTurned = this.state.isGhostTurned;
+    if (ghostPos[0] == 1 && ghostPos[1] == 1 && !this.state.isGhostTurned) {
+      console.log("ghost turned");
+      isGhostTurned = true;
     }
 
     this.setState({
-      pacmanPos: curPos,
-      isOpen,
-      isFaceLeft,
-      hasDot,
       ghostPos,
-      score
+      score,
+      isGhostFaceLeft,
+      isGhostTurned
     });
+  };
+
+  resetGame = () => {
+    console.log("reset game");
+    this.setState(this.initialState);
   };
 
   render() {
@@ -167,6 +205,10 @@ class App extends React.Component {
           hasDot={this.state.hasDot}
           isGameOver={this.state.isGameOver}
           score={this.state.score}
+          isGhostFaceLeft={this.state.isGhostFaceLeft}
+          resetGame={this.resetGame}
+          isGhostTurned={this.state.isGhostTurned}
+          isGhostEaten={this.state.isGhostEaten}
         />
       </div>
     );
@@ -182,7 +224,7 @@ const GameMessage = props => {
       {props.isGameOver ? (
         <>
           <div className="red">Game Over</div>
-          <button>Play Again</button>
+          <button onClick={() => props.resetGame()}>Play Again</button>
         </>
       ) : (
         ""
@@ -204,7 +246,11 @@ const GameGrid = props => {
 
   return (
     <div id="game-container">
-      <GameMessage score={props.score} isGameOver={props.isGameOver} />
+      <GameMessage
+        score={props.score}
+        isGameOver={props.isGameOver}
+        resetGame={props.resetGame}
+      />
       <div id="game-grid">
         {props.gridBlocks.map(gbRows => {
           row++;
@@ -242,8 +288,25 @@ const GameGrid = props => {
                   }
                 ></div>
               );
-            } else if (col == props.ghostPos[0] && row == props.ghostPos[1]) {
-              ret = <div id="ghost"></div>;
+            } else if (
+              col == props.ghostPos[0] &&
+              row == props.ghostPos[1] &&
+              !props.isGhostEaten
+            ) {
+              ret = (
+                <div
+                  id="ghost"
+                  className={
+                    props.isGhostTurned
+                      ? "ghost-dead"
+                      : props.isGhostFaceLeft
+                      ? "ghost-left"
+                      : "ghost-right"
+                  }
+                ></div>
+              );
+            } else if (row == 1 && col == 1 && !props.isGhostTurned) {
+              ret = <div className="cherry"></div>;
             } else if (props.hasDot[row - 1][col - 1]) {
               ret = <div className="dot">{String.fromCharCode(9711)}</div>;
             } else {

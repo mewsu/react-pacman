@@ -98,10 +98,19 @@ body {
   height: 100%;
 }
 
+.cherry {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-size: 65%;
+  background-position: center;
+  background-image: url("./img/cherry_2.png");
+}
+
 #ghost {
   width: 100%;
   height: 100%;
-  background-image: url("./img/ghost.png");
+  /* background-image: url("./img/ghost.png"); */
   background-repeat: no-repeat;
   background-size: 65%;
   background-position: center;
@@ -109,6 +118,14 @@ body {
 
 .ghost-right {
   background-image: url("./img/ghost.png");
+}
+
+.ghost-left {
+  background-image: url("./img/ghost-left.png");
+}
+
+.ghost-dead {
+  background-image: url("./img/ghost-dead.png");
 }
 
 .hide {
@@ -125,6 +142,7 @@ button {
   width: 175px;
   margin-top: 15px;
   font-weight: bold;
+  cursor: pointer;
 }
 
 .red {
