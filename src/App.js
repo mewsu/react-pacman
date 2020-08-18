@@ -92,7 +92,38 @@ class App extends React.Component {
     isOpen = !isOpen;
     const hasDot = JSON.parse(JSON.stringify(this.state.hasDot));
     if (hasDot[row][col]) hasDot[row][col] = 0;
-    this.setState({ pacmanPos: curPos, isOpen, isFaceLeft, hasDot });
+
+    // move ghost
+    const ghostPos = [...this.state.ghostPos];
+    const ghostPosCol = ghostPos[1] - 1;
+    const ghostPosRow = ghostPos[0] - 1;
+    const ghostBlockInfo = this.gridBlocks[ghostPosCol][ghostPosRow];
+    const possibleMoves = ghostBlockInfo.reduce((a, c, i) => {
+      if (c == 0) a.push(i);
+      return a;
+    }, []);
+    possibleMoves.push(-1); // stay
+    console.log({ possibleMoves });
+    // [up, right, down, left]
+    const ghostMove =
+      possibleMoves[getRandomIntInclusive(0, possibleMoves.length - 1)];
+    console.log({ ghostMove });
+    // const newGhostPos = [];
+    if (ghostMove == 0) {
+      // up
+      ghostPos[1]--;
+    } else if (ghostMove == 1) {
+      // right
+      ghostPos[0]++;
+    } else if (ghostMove == 2) {
+      // down
+      ghostPos[1]++;
+    } else if (ghostMove == 3) {
+      // left
+      ghostPos[0]--;
+    }
+
+    this.setState({ pacmanPos: curPos, isOpen, isFaceLeft, hasDot, ghostPos });
   };
 
   render() {
@@ -177,3 +208,9 @@ const GameGrid = props => {
 };
 
 ReactDOM.render(<App />, document.getElementById("root"));
+
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min; //The maximum is inclusive and the minimum is inclusive
+}
