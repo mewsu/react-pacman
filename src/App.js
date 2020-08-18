@@ -14,8 +14,10 @@ class App extends React.Component {
         [1, 1, 1, 1, 1],
         [1, 1, 1, 1, 1],
         [1, 1, 1, 1, 1],
-        [1, 1, 1, 1, 1]
-      ]
+        [1, 1, 1, 1, 0]
+      ],
+      isGameOver: false,
+      score: 1
     };
   }
 
@@ -64,11 +66,13 @@ class App extends React.Component {
   };
 
   handleKeyPress = e => {
+    if (this.state.isGameOver) return;
     const handleThese = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
     if (!handleThese.includes(e.key)) return;
     // console.log(e.key);
     const key = e.key;
     const curPos = [...this.state.pacmanPos];
+
     // console.log(curPos);
     // console.log(this.gridBlocks);
     const col = curPos[1] - 1;
@@ -91,7 +95,11 @@ class App extends React.Component {
     }
     isOpen = !isOpen;
     const hasDot = JSON.parse(JSON.stringify(this.state.hasDot));
-    if (hasDot[row][col]) hasDot[row][col] = 0;
+    let score = this.state.score;
+    if (hasDot[curPos[1] - 1][curPos[0] - 1]) {
+      score++;
+      hasDot[curPos[1] - 1][curPos[0] - 1] = 0;
+    }
 
     // move ghost
     const ghostPos = [...this.state.ghostPos];
@@ -103,12 +111,12 @@ class App extends React.Component {
       return a;
     }, []);
     possibleMoves.push(-1); // stay
-    console.log({ possibleMoves });
+    // console.log({ possibleMoves });
     // [up, right, down, left]
     const ghostMove =
       possibleMoves[getRandomIntInclusive(0, possibleMoves.length - 1)];
-    console.log({ ghostMove });
-    // const newGhostPos = [];
+    // console.log({ ghostMove });
+
     if (ghostMove == 0) {
       // up
       ghostPos[1]--;
@@ -122,8 +130,29 @@ class App extends React.Component {
       // left
       ghostPos[0]--;
     }
+    // console.log({ curPos, ghostPos });
 
-    this.setState({ pacmanPos: curPos, isOpen, isFaceLeft, hasDot, ghostPos });
+    if (
+      // even rows col less = game over, vice verse for odd
+      (ghostPos[1] % 2 == 0 &&
+        ghostPos[0] <= curPos[0] &&
+        ghostPos[1] >= curPos[1]) ||
+      (ghostPos[1] % 2 != 0 &&
+        ghostPos[0] >= curPos[0] &&
+        ghostPos[1] >= curPos[1])
+    ) {
+      console.log("game over");
+      this.setState({ isGameOver: true });
+    }
+
+    this.setState({
+      pacmanPos: curPos,
+      isOpen,
+      isFaceLeft,
+      hasDot,
+      ghostPos,
+      score
+    });
   };
 
   render() {
@@ -136,11 +165,31 @@ class App extends React.Component {
           isOpen={this.state.isOpen}
           gridBlocks={this.gridBlocks}
           hasDot={this.state.hasDot}
+          isGameOver={this.state.isGameOver}
+          score={this.state.score}
         />
       </div>
     );
   }
 }
+
+const GameMessage = props => {
+  return (
+    <div id="score">
+      <div>
+        Score: <span className="green">{props.score}</span>
+      </div>
+      {props.isGameOver ? (
+        <>
+          <div className="red">Game Over</div>
+          <button>Play Again</button>
+        </>
+      ) : (
+        ""
+      )}
+    </div>
+  );
+};
 
 const GameGrid = props => {
   const borderTypes = [
@@ -155,6 +204,7 @@ const GameGrid = props => {
 
   return (
     <div id="game-container">
+      <GameMessage score={props.score} isGameOver={props.isGameOver} />
       <div id="game-grid">
         {props.gridBlocks.map(gbRows => {
           row++;
@@ -173,7 +223,11 @@ const GameGrid = props => {
             });
             // console.log({ row, col });
             let ret;
-            if (col == props.pacmanPos[0] && row == props.pacmanPos[1]) {
+            if (
+              col == props.pacmanPos[0] &&
+              row == props.pacmanPos[1] &&
+              !props.isGameOver
+            ) {
               ret = (
                 <div
                   id="pacman"
@@ -190,7 +244,7 @@ const GameGrid = props => {
               );
             } else if (col == props.ghostPos[0] && row == props.ghostPos[1]) {
               ret = <div id="ghost"></div>;
-            } else if (props.hasDot[col - 1][row - 1]) {
+            } else if (props.hasDot[row - 1][col - 1]) {
               ret = <div className="dot">{String.fromCharCode(9711)}</div>;
             } else {
               ret = "";
