@@ -9,7 +9,7 @@ class App extends React.Component {
 
   initialState = {
     pacmanPos: [5, 5],
-    ghostPos: [2, 1],
+    ghostPos: [3, 3],
     isFaceLeft: true,
     isOpen: true,
     hasDot: [
