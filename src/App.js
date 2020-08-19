@@ -1,7 +1,6 @@
 // TODO:
-// ghost facing
-// restart button
-// winning cherry, turn ghost to eatable
+// dead ghost facing
+// dark mode
 
 import React from "react";
 import ReactDOM from "react-dom";
@@ -14,7 +13,7 @@ class App extends React.Component {
 
   initialState = {
     pacmanPos: [5, 5],
-    ghostPos: [2, 1],
+    ghostPos: [3, 3],
     isFaceLeft: true,
     isOpen: true,
     hasDot: [
@@ -28,7 +27,8 @@ class App extends React.Component {
     score: 1,
     isGhostFaceLeft: false,
     isGhostTurned: false,
-    isGhostEaten: false
+    isGhostEaten: false,
+    isVictory: false
   };
 
   gridBlocks = [
@@ -106,9 +106,15 @@ class App extends React.Component {
     isOpen = !isOpen;
     const hasDot = JSON.parse(JSON.stringify(this.state.hasDot));
     let score = this.state.score;
+    let isGameOver = this.state.isGameOver;
+    let isVictory = this.state.isVictory;
     if (hasDot[curPos[1] - 1][curPos[0] - 1]) {
       score++;
       hasDot[curPos[1] - 1][curPos[0] - 1] = 0;
+      if (score >= 125) {
+        isGameOver = true;
+        isVictory = true;
+      }
     }
 
     this.setState({
@@ -116,7 +122,9 @@ class App extends React.Component {
       isOpen,
       isFaceLeft,
       hasDot,
-      score
+      score,
+      isGameOver,
+      isVictory
     });
 
     // move ghost
@@ -153,6 +161,12 @@ class App extends React.Component {
     }
     // console.log({ curPos, ghostPos });
 
+    let isGhostTurned = this.state.isGhostTurned;
+    if (ghostPos[0] == 1 && ghostPos[1] == 1 && !this.state.isGhostTurned) {
+      console.log("ghost turned");
+      isGhostTurned = true;
+    }
+
     if (
       // even rows col less = game over, vice verse for odd
       (ghostPos[1] % 2 == 0 &&
@@ -162,23 +176,18 @@ class App extends React.Component {
         ghostPos[0] >= curPos[0] &&
         ghostPos[1] >= curPos[1])
     ) {
-      if (this.state.isGhostTurned) {
+      if (isGhostTurned) {
         console.log("ghost eaten");
-        score += 100;
+        score += 101;
         this.setState({ isGhostEaten: true });
       } else {
         console.log("game over");
         this.setState({ isGameOver: true });
-        return;
+        // return;
       }
     }
 
-    console.log({ ghostPos });
-    let isGhostTurned = this.state.isGhostTurned;
-    if (ghostPos[0] == 1 && ghostPos[1] == 1 && !this.state.isGhostTurned) {
-      console.log("ghost turned");
-      isGhostTurned = true;
-    }
+    // console.log({ ghostPos });
 
     this.setState({
       ghostPos,
@@ -209,6 +218,7 @@ class App extends React.Component {
           resetGame={this.resetGame}
           isGhostTurned={this.state.isGhostTurned}
           isGhostEaten={this.state.isGhostEaten}
+          isVictory={this.state.isVictory}
         />
       </div>
     );
@@ -223,7 +233,11 @@ const GameMessage = props => {
       </div>
       {props.isGameOver ? (
         <>
-          <div className="red">Game Over</div>
+          {props.isVictory ? (
+            <div className="green">You Win!</div>
+          ) : (
+            <div className="red">Game Over</div>
+          )}
           <button onClick={() => props.resetGame()}>Play Again</button>
         </>
       ) : (
@@ -250,6 +264,7 @@ const GameGrid = props => {
         score={props.score}
         isGameOver={props.isGameOver}
         resetGame={props.resetGame}
+        isVictory={props.isVictory}
       />
       <div id="game-grid">
         {props.gridBlocks.map(gbRows => {
@@ -272,19 +287,14 @@ const GameGrid = props => {
             if (
               col == props.pacmanPos[0] &&
               row == props.pacmanPos[1] &&
-              !props.isGameOver
+              (!props.isGameOver || (props.isGameOver && props.isVictory))
             ) {
               ret = (
                 <div
                   id="pacman"
                   className={
-                    props.isFaceLeft
-                      ? props.isOpen
-                        ? "pacman-open-left"
-                        : "pacman-close-left"
-                      : props.isOpen
-                      ? "pacman-open-right"
-                      : "pacman-close-right"
+                    (props.isOpen ? "pacman-open" : "pacman-close") +
+                    (props.isFaceLeft ? " face-left" : "")
                   }
                 ></div>
               );
@@ -297,11 +307,8 @@ const GameGrid = props => {
                 <div
                   id="ghost"
                   className={
-                    props.isGhostTurned
-                      ? "ghost-dead"
-                      : props.isGhostFaceLeft
-                      ? "ghost-left"
-                      : "ghost-right"
+                    (props.isGhostTurned ? "ghost-turned" : "ghost-normal") +
+                    (props.isGhostFaceLeft ? " face-left" : "")
                   }
                 ></div>
               );

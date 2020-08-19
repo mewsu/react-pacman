@@ -77,19 +77,11 @@ body {
   background-size: contain;
 }
 
-.pacman-open-left {
-  background-image: url("./img/pacman-open-left.png");
-}
-
-.pacman-open-right {
+.pacman-open {
   background-image: url("./img/pacman-open.png");
 }
 
-.pacman-close-left {
-  background-image: url("./img/pacman-close-left.png");
-}
-
-.pacman-close-right {
+.pacman-close {
   background-image: url("./img/pacman-close.png");
 }
 
@@ -104,7 +96,7 @@ body {
   background-repeat: no-repeat;
   background-size: 65%;
   background-position: center;
-  background-image: url("./img/cherry_2.png");
+  background-image: url("./img/cherry.png");
 }
 
 #ghost {
@@ -116,16 +108,16 @@ body {
   background-position: center;
 }
 
-.ghost-right {
+.ghost-normal {
   background-image: url("./img/ghost.png");
 }
 
-.ghost-left {
-  background-image: url("./img/ghost-left.png");
+.ghost-turned {
+  background-image: url("./img/ghost-turned.png");
 }
 
-.ghost-dead {
-  background-image: url("./img/ghost-dead.png");
+.face-left {
+  transform: scaleX(-1);
 }
 
 .hide {
