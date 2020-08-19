@@ -20,6 +20,7 @@ body {
   justify-content: center;
   align-items: center;
   width: 100%;
+  margin-top: 25px;
 }
 
 #score {
@@ -51,6 +52,7 @@ body {
   grid-template-rows: repeat(5, 1fr);
   grid-template-columns: repeat(5, 1fr);
   border-color: white;
+  margin-top: 25px;
 }
 
 #game-grid div {

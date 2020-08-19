@@ -9,7 +9,7 @@ class App extends React.Component {
 
   initialState = {
     pacmanPos: [5, 5],
-    ghostPos: [3, 3],
+    ghostPos: [2, 1],
     isFaceLeft: true,
     isOpen: true,
     hasDot: [
@@ -73,6 +73,7 @@ class App extends React.Component {
 
   handleKeyPress = e => {
     if (this.state.isGameOver) return;
+    e.preventDefault();
     const handleThese = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"];
     if (!handleThese.includes(e.key)) return;
     // console.log(e.key);
@@ -175,7 +176,11 @@ class App extends React.Component {
       if (isGhostTurned) {
         // console.log("ghost eaten");
         score += 101;
-        this.setState({ isGhostEaten: true });
+        if (score >= 125) {
+          isGameOver = true;
+          isVictory = true;
+        }
+        this.setState({ isGhostEaten: true, isGameOver, isVictory });
       } else {
         // console.log("game over");
         this.setState({ isGameOver: true });
