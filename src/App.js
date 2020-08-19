@@ -1,7 +1,3 @@
-// TODO:
-// dead ghost facing
-// dark mode
-
 import React from "react";
 import ReactDOM from "react-dom";
 
@@ -163,7 +159,7 @@ class App extends React.Component {
 
     let isGhostTurned = this.state.isGhostTurned;
     if (ghostPos[0] == 1 && ghostPos[1] == 1 && !this.state.isGhostTurned) {
-      console.log("ghost turned");
+      // console.log("ghost turned");
       isGhostTurned = true;
     }
 
@@ -177,11 +173,11 @@ class App extends React.Component {
         ghostPos[1] >= curPos[1])
     ) {
       if (isGhostTurned) {
-        console.log("ghost eaten");
+        // console.log("ghost eaten");
         score += 101;
         this.setState({ isGhostEaten: true });
       } else {
-        console.log("game over");
+        // console.log("game over");
         this.setState({ isGameOver: true });
         // return;
       }
@@ -198,7 +194,7 @@ class App extends React.Component {
   };
 
   resetGame = () => {
-    console.log("reset game");
+    // console.log("reset game");
     this.setState(this.initialState);
   };
 
@@ -228,7 +224,7 @@ class App extends React.Component {
 const GameMessage = props => {
   return (
     <div id="score">
-      <div>
+      <div className="white">
         Score: <span className="green">{props.score}</span>
       </div>
       {props.isGameOver ? (
@@ -326,6 +322,10 @@ const GameGrid = props => {
             );
           });
         })}
+      </div>
+      <div id="info">
+        Use {String.fromCharCode(8592)} {String.fromCharCode(8593)}{" "}
+        {String.fromCharCode(8594)} {String.fromCharCode(8595)} to move.
       </div>
     </div>
   );
